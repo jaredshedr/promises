@@ -1,3 +1,6 @@
+const fs = require('fs');
+var Promise = require('bluebird');
+
 /**
  * Using Promise.all, write a function, combineFirstLineOfManyFiles, that:
  *    1. Reads each file at the path in the `filePaths` array
@@ -11,6 +14,34 @@
 
 var combineFirstLineOfManyFiles = function(filePaths, writePath) {
   // TODO
+
+  var promiseArray = [];
+
+    for (let file of filePaths) {
+      let temp = fs.promises.readFile(file, 'utf8')
+      promiseArray.push(temp)
+    }
+  return Promise.all(promiseArray)
+      .then(promise => {
+        let firstLines = [];
+        for (let line of promise) {
+          let firstLine = line.split('\n')[0]
+          firstLines.push(firstLine);
+        }
+        return firstLines
+      })
+      .then((newValues) => {
+          let newData = newValues.join('\n');
+          fs.writeFile(writePath, newData, (err) => {
+            if (err) {
+              console.log('error', err)
+            } else {
+              console.log('written file')
+            }
+          })
+      })
+
+
 };
 
 // Export these functions so we can unit test them
